@@ -31,6 +31,23 @@ pub trait CanisterState<
     fn factory_mut(&mut self) -> super::Factory<FactoryCanisterKey>;
 }
 
+impl<T, CS> FactoryCanister<CS> for T
+where
+    CS: FactoryState<String>,
+    T: Canister + CanisterState<CS, String> + Sized,
+{
+    type FactoryCanisterKey = String;
+    fn get_canister_bytecode() -> Vec<u8> {
+        panic!("TODO: implement")
+    }
+
+    #[query]
+    fn get_checksum<'a>(&'a self) -> String {
+        // <T>::get_checksum(self)
+        todo!()
+    }
+}
+
 /// API methods that are added:
 /// * get_checksum
 /// * get_cycles
@@ -47,14 +64,14 @@ pub trait CanisterState<
 /// * set_controller
 /// * refund_icp
 pub trait FactoryCanister<CanisterStateStruct: FactoryState<Self::FactoryCanisterKey>>:
-    Canister + CanisterState<CanisterStateStruct, Self::FactoryCanisterKey>
+    Canister + CanisterState<CanisterStateStruct, Self::FactoryCanisterKey> + Sized
 {
     type FactoryCanisterKey: FactoryCanisterKeyBounds;
 
     fn get_canister_bytecode() -> Vec<u8>;
 
     /// Returns the checksum of a wasm module in hex representation.
-    #[query]
+    // #[query]
     fn get_checksum<'a>(&'a self) -> String {
         self.state().checksum().to_string()
     }
@@ -89,8 +106,6 @@ pub trait FactoryCanister<CanisterStateStruct: FactoryState<Self::FactoryCaniste
 
     /// Upgrades canisters controller by the factory and returns a list of outdated canisters
     /// (in case an upgrade error occurs).
-    // #[update]
-    // fn upgrade(&mut self) -> AsyncReturn<Vec<Principal>> {
     #[update]
     fn upgrade(&mut self) -> AsyncReturn<Vec<Principal>> {
         // TODO: At the moment we do not do any security checks for this method, for even if there's

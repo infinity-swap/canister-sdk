@@ -35,11 +35,6 @@ pub(crate) fn api_method(
     }
 
     let method_name = method.to_string();
-    let export_name = if !is_management_api {
-        format!("canister_{method_type} {method_name}")
-    } else {
-        format!("canister_{method_type}")
-    };
 
     let internal_method = Ident::new(&format!("__{method_name}"), method.span());
 
@@ -96,6 +91,8 @@ pub(crate) fn api_method(
             _ => panic!("Invalid arg name"),
         };
 
+        // let arg_type = crate::derive::extract_type_if_matches("AsyncReturn", arg_type);
+        // arg_types.push_value(arg_type.clone());
         arg_types.push_value(arg_type.as_ref().clone());
         arg_types.push_punct(Default::default());
 
@@ -128,7 +125,34 @@ pub(crate) fn api_method(
         elems: args_destr.clone(),
     };
 
+    // let rets = match &sig.output {
+    //     ReturnType::Default => Vec::new(),
+    //     ReturnType::Type(_, ty) => match ty.as_ref() {
+    //         Type::Tuple(tuple) => tuple.elems.iter().cloned().collect(),
+    //         ty => {
+    //             // Some types in trait canisters had to be marked as `AsyncReturn` as implementation detail
+    //             // but we do not need this when exporting them to candid files as ic calls them correctly
+    //             // in any case.
+    //             let extracted_type = crate::derive::extract_type_if_matches("AsyncReturn", ty);
+    //             vec![extracted_type.clone()]
+    //         }
+    //     },
+    // };
+
+    let is_async_return_type = if let ReturnType::Type(_, ty) = &input.sig.output {
+        let extracted = crate::derive::extract_type_if_matches("AsyncReturn", ty);
+        &**ty != extracted
+    } else {
+        false
+    };
+
     let await_call = if input.sig.asyncness.is_some() {
+        quote! { .await }
+    } else {
+        quote! {}
+    };
+
+    let await_call_if_result_is_async = if is_async_return_type {
         quote! { .await }
     } else {
         quote! {}
@@ -139,13 +163,13 @@ pub(crate) fn api_method(
         #input
 
         #[cfg(all(target_arch = "wasm32", not(feature = "no_api")))]
-        #[export_name = #export_name]
+        // #[export_name = #export_name]
         fn #internal_method() {
             ::ic_cdk::setup();
             ::ic_cdk::spawn(async {
                 let #args_destr_tuple: #arg_type = ::ic_cdk::api::call::arg_data();
                 let mut instance = Self::init_instance();
-                let result = instance. #method(#args_destr) #await_call;
+                let result = instance. #method(#args_destr) #await_call #await_call_if_result_is_async;
                 #reply_call
             });
         }
@@ -153,6 +177,7 @@ pub(crate) fn api_method(
         #[cfg(not(target_arch = "wasm32"))]
         #[allow(dead_code)]
         #orig_vis fn #internal_method<#self_lifetime>(#args) -> ::std::pin::Pin<Box<dyn ::core::future::Future<Output = ::ic_cdk::api::call::CallResult<#inner_return_type>> + #self_lifetime>> {
+        // #orig_vis fn #internal_method<#self_lifetime>(#args) -> ::ic_cdk::api::call::CallResult<#inner_return_type> {
             // todo: trap handler
             let result = self. #method(#args_destr);
             Box::pin(async move { Ok(result #await_call) })

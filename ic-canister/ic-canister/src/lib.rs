@@ -406,6 +406,8 @@
 //!
 //! You can generate IDL (Candid) definition for your canister using [generate_idl] macro.
 
+#![feature(box_patterns)]
+
 use ic_cdk::api::call::{CallResult, RejectionCode};
 use ic_cdk::export::candid::utils::ArgumentDecoder;
 use ic_cdk::export::candid::{CandidType, Deserialize};
@@ -416,10 +418,12 @@ use std::rc::Rc;
 
 pub use ic_canister_macros::*;
 
-// Reexport ic_kit of required version to simplify the dependency hell.
 pub use ic_kit;
 
+pub mod idl;
 pub mod storage;
+
+pub use idl::*;
 
 /// Main trait for a testable canister. Do not implement this trait manually, use the derive macro.
 pub trait Canister {

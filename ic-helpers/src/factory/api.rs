@@ -31,7 +31,7 @@ pub trait CanisterState<
     fn factory_mut(&mut self) -> super::Factory<FactoryCanisterKey>;
 }
 
-impl<T, CS> FactoryCanister<CS> for T
+impl<T, CS> FactoryCanister<CS> for &T
 where
     CS: FactoryState<String>,
     T: Canister + CanisterState<CS, String> + Sized,
@@ -41,7 +41,7 @@ where
         panic!("TODO: implement")
     }
 
-    #[query]
+    // #[query]
     fn get_checksum<'a>(&'a self) -> String {
         // <T>::get_checksum(self)
         todo!()

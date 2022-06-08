@@ -406,8 +406,6 @@
 //!
 //! You can generate IDL (Candid) definition for your canister using [generate_idl] macro.
 
-#![feature(box_patterns)]
-
 use ic_cdk::api::call::{CallResult, RejectionCode};
 use ic_cdk::export::candid::utils::ArgumentDecoder;
 use ic_cdk::export::candid::{CandidType, Deserialize};

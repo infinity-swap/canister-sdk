@@ -1,5 +1,5 @@
 use candid::{CandidType, Deserialize, Principal};
-use canister_a::CanisterA;
+use canister_a::{CanisterA, CanisterATrait};
 use ic_canister::{canister_call, canister_notify, virtual_canister_call, virtual_canister_notify};
 use ic_storage::stable::Versioned;
 use ic_storage::IcStorage;
@@ -92,6 +92,7 @@ impl CanisterB {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ic_canister::ic_kit::MockContext;
 
     fn get_canister_b(canister_a: Principal) -> CanisterB {
         let canister = CanisterB::init_instance();
@@ -102,6 +103,8 @@ mod tests {
 
     #[tokio::test]
     async fn inter_canister_call() {
+        MockContext::new().inject();
+
         let canister_a = CanisterA::init_instance();
         let canister_a2 = CanisterA::init_instance();
         let canister_b = get_canister_b(canister_a.principal());

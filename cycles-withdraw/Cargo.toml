@@ -1,0 +1,18 @@
+[package]
+name = "cycles-withdraw"
+version = "0.0.1"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+path = "src/lib.rs"
+
+[dependencies]
+ic-cdk = "0.5"
+ic-cdk-macros = "0.5"
+candid = "0.7"
+ic-canister = { path = "../ic-canister/ic-canister" }
+ic-canister-macros = { path = "../ic-canister/ic-canister-macros" }
+ic-storage = { path = "../ic-storage" }
+thiserror = "1.0"
+serde = "1.0"

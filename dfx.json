@@ -11,6 +11,12 @@
       "candid": "ic-canister/tests/canister_b/canister_b.did",
       "wasm": "target/wasm32-unknown-unknown/release/canister_b-opt.wasm",
       "type": "custom"
+    },
+    "cycles-withdraw": {
+      "build": "bash scripts/build.sh",
+      "candid": "target/wasm32-unknown-unknown/release/cycles-withdraw.did",
+      "wasm": "target/wasm32-unknown-unknown/release/cycles-withdraw-opt.wasm",
+      "type": "custom"
     }
   },
   "networks": {

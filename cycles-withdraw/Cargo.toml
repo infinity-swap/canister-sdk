@@ -2,10 +2,14 @@
 name = "cycles-withdraw"
 version = "0.0.1"
 edition = "2021"
+#forced-target = "wasm32-unknown-unknown"
 
 [lib]
 crate-type = ["cdylib"]
 path = "src/lib.rs"
+
+#[build]
+#target="wasm32-unknown-unknown"
 
 [dependencies]
 ic-cdk = "0.5"

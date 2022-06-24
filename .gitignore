@@ -1,7 +1,11 @@
 .idea
-.dfx
+.vscode
 target
-/.vscode
-
-/target
 Cargo.lock
+
+/target-wasm
+/cycles-withdraw/target
+
+**/cycles-withdraw.wasm
+
+.dfx

@@ -1,0 +1,1 @@
+const WITHDRAW_MODULE: &'static [u8] = include_bytes!("cycles-withdraw.wasm");

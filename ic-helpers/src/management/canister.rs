@@ -136,6 +136,10 @@ struct ProvisionalTopUpCanisterInput {
 }
 
 impl Canister {
+    pub fn id(&self) -> CanisterID {
+        self.0
+    }
+
     #[allow(unused_variables)]
     pub async fn create(
         settings: Option<CanisterSettings>,

@@ -1,5 +1,5 @@
 [package]
-name = "canister_b"
+name = "canister-b"
 version = "0.2.0"
 edition = "2021"
 
@@ -11,10 +11,10 @@ crate-type = ["lib", "cdylib"]
 [dependencies]
 ic-cdk = "0.5"
 candid = "0.7"
-canister_a = {path = "../canister_a", features = ["no_api"]}
-ic-storage = {path = "../../../ic-storage"}
-ic-canister = {path = "../../ic-canister"}
-ic-helpers = {path = "../../../ic-helpers"}
+canister-a = {path = "../canister-a", features = ["no_api"]}
+ic-storage = {path = "../../ic-storage"}
+ic-canister = {path = "../../ic-canister/ic-canister"}
+ic-helpers = {path = "../../ic-helpers"}
 serde = "1.0"
 
 [dev-dependencies]

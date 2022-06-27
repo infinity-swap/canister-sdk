@@ -8,7 +8,7 @@ use ic_cdk::api::{canister_balance128, trap};
 use ic_cdk::api::call::{call_raw128, CallResult};
 use serde::Deserialize;
 
-use ic_canister::Canister;
+use ic_canister::{Canister, PreUpdate};
 use ic_canister_macros::{init, query, update};
 use ic_storage::IcStorage;
 use ic_storage::stable::Versioned;
@@ -52,6 +52,8 @@ pub struct WalletCanister {
     #[state]
     state: Rc<RefCell<WalletState>>,
 }
+
+impl PreUpdate for WalletCanister {}
 
 #[allow(dead_code)]
 impl WalletCanister {

@@ -3,9 +3,11 @@
 target
 Cargo.lock
 
-/target-wasm
+/target-withdraw
+/target-tests
 /cycles-withdraw/target
 
 **/cycles-withdraw.wasm
+**/canister-a.wasm
 
 .dfx

@@ -1,5 +1,5 @@
 [package]
-name = "canister_c"
+name = "canister-a"
 version = "0.2.0"
 edition = "2021"
 
@@ -15,9 +15,9 @@ no_api = []
 [dependencies]
 ic-cdk = "0.5"
 candid = "0.7"
-ic-storage = {path = "../../../ic-storage"}
-ic-canister = {path = "../../ic-canister"}
-ic-helpers = {path = "../../../ic-helpers"}
+ic-storage = {path = "../../ic-storage"}
+ic-canister = {path = "../../ic-canister/ic-canister"}
+ic-helpers = {path = "../../ic-helpers"}
 serde = "1.0"
 
 [dev-dependencies]

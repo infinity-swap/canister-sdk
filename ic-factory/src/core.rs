@@ -1,11 +1,14 @@
-use crate::error::FactoryError;
-use crate::types::{Canister, Checksum, Version};
-use candid::utils::ArgumentEncoder;
-use candid::{CandidType, Principal};
-use ic_cdk::api::call::CallResult;
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::future::Future;
+
+use candid::{CandidType, Principal};
+use candid::utils::ArgumentEncoder;
+use ic_cdk::api::call::CallResult;
+use serde::{Deserialize, Serialize};
+
+use crate::error::FactoryError;
+use crate::types::{Canister, Checksum, Version};
+use crate::withdraw::withdraw_cycles;
 
 /// Represents a state that manages ic-helpers.
 #[derive(CandidType, Debug, Clone, Serialize, Deserialize, Default)]
@@ -51,7 +54,7 @@ impl Factory {
             .collect()
     }
 
-    /// Creates a pair with cycles in it to make it workable.
+    /// Creates a canister with cycles in it to make it workable.
     ///
     /// The amount of cycles that will be available in the created canister is `cycles - FEE`, where
     /// `FEE` is a constant value needed to cover the factory expenses. Current implementation has
@@ -61,13 +64,20 @@ impl Factory {
         wasm_module: &[u8],
         arg: A,
         cycles: u64,
-    ) -> impl Future<Output = CallResult<Canister>> {
+    ) -> impl Future<Output=CallResult<Canister>> {
         Canister::create(self.checksum.version, wasm_module.into(), arg, cycles)
     }
 
     /// Stops and deletes the canister. After this actor is awaited on, [Factory::forget] method must be used
     /// to remove the canister from the list of created canisters.
-    pub fn drop(&self, canister: Principal) -> impl Future<Output = Result<(), FactoryError>> {
+    pub fn drop(&self, canister: Principal) -> impl Future<Output=Result<(), FactoryError>> {
+        drop_canister(canister)
+    }
+
+    /// Stops and deletes the canister plus return all canister cycles to provided principal.
+    /// After this actor is awaited on, [Factory::forget] method must be used
+    /// to remove the canister from the list of created canisters.
+    pub fn drop_withdraw(&self, withdraw_to: Principal, canister: Principal) -> impl Future<Output=Result<(), FactoryError>> {
         drop_canister(canister)
     }
 
@@ -96,7 +106,7 @@ impl Factory {
         &self,
         canister: &Canister,
         wasm_module: Vec<u8>,
-    ) -> impl Future<Output = CallResult<Canister>> {
+    ) -> impl Future<Output=CallResult<Canister>> {
         upgrade_canister(self.checksum.version, canister.clone(), wasm_module)
     }
 
@@ -118,12 +128,35 @@ async fn upgrade_canister(
     Ok(canister)
 }
 
-async fn drop_canister(canister: Principal) -> Result<(), FactoryError> {
-    let canister = ic_helpers::management::Canister::from(canister);
+async fn drop_canister(principal: Principal) -> Result<(), FactoryError> {
+    let canister = ic_helpers::management::Canister::from(principal);
+
     canister
         .stop()
         .await
         .map_err(|(_, e)| FactoryError::ManagementError(e))?;
+
+    canister
+        .delete()
+        .await
+        .map_err(|(_, e)| FactoryError::ManagementError(e))?;
+
+    Ok(())
+}
+
+async fn drop_canister_and_withdraw(canister: Principal, withdraw_to: Option<Principal>) -> Result<(), FactoryError> {
+    let canister = ic_helpers::management::Canister::from(canister);
+
+    canister
+        .stop()
+        .await
+        .map_err(|(_, e)| FactoryError::ManagementError(e))?;
+
+    if let Some(withdraw) = withdraw_to {
+        withdraw_cycles(withdraw, &canister).await;
+    }
+
+    // Withdraw
     canister
         .delete()
         .await

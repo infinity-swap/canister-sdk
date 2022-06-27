@@ -1,0 +1,23 @@
+[package]
+name = "proto-factory"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+path = "src/lib.rs"
+
+[dependencies]
+candid = "0.7"
+#ic-agent = "0.16"
+ic-cdk = "0.5"
+ic-cdk-macros = "0.5"
+serde = "1.0"
+thiserror = "1.0"
+
+ic-canister = { path = "../../ic-canister/ic-canister" }
+ic-canister-macros = { path = "../../ic-canister/ic-canister-macros" }
+ic-factory = { path = "../../ic-factory" }
+ic-storage = { path = "../../ic-storage" }
+ic-helpers = {path = "../../ic-helpers"}
+#

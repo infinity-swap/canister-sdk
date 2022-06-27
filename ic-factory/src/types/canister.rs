@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 
 /// Represents information of a canister.
 #[derive(CandidType, Debug, Clone, Serialize, Deserialize)]
+#[deprecated]
 pub struct Canister(Principal, Version);
 
 impl Canister {

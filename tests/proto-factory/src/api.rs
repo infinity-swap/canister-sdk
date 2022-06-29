@@ -1,3 +1,5 @@
+use std::path::MAIN_SEPARATOR;
+
 use candid::{CandidType, Principal};
 use candid::types::{Serializer, Type};
 use ic_cdk::api::{canister_balance128, trap};
@@ -7,7 +9,8 @@ use ic_canister::{Canister, PreUpdate};
 use ic_canister_macros::{init, query, update};
 use ic_factory::api::FactoryCanister;
 
-const A_BYTES: &'static [u8] = include_bytes!("canister-a.wasm");
+const A_BYTES: &'static [u8] = include_bytes!(concat!(env!("OUT_DIR"), "/canister-a.wasm"));
+
 const CYCLES_TO_ADD: u64 = 100_000_000_000;
 
 #[derive(Clone, Canister)]

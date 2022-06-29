@@ -5,12 +5,7 @@ use ic_canister_macros::{canister_call, virtual_canister_call};
 
 use crate::error::FactoryError;
 
-const WITHDRAW_MODULE: &'static [u8] = include_bytes!("cycles-withdraw.wasm");
-
-// #[derive(Serialize, Deserialize, CandidType, Clone, Debug)]
-// struct CyclesWalletInitPayload {
-//     withdraw_to: Principal,
-// }
+const WITHDRAW_MODULE: &'static [u8] = include_bytes!(concat!(env!("OUT_DIR"), "/cycles-withdraw.wasm"));
 
 pub fn get_bytes() -> Vec<u8> {
     Vec::from(WITHDRAW_MODULE)

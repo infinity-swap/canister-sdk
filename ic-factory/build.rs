@@ -10,9 +10,13 @@ macro_rules! w {
 
 fn main() {
     // Tricky relative dirs
-    let target = "target-withdraw";
+    let target_dir_env = std::env::var("CARGO_TARGET_DIR").unwrap_or("target".to_string());
+    let target_dir = Path::new(&target_dir_env).join("target-withdraw");
     let ws = Path::new(".").join("..");
-    let ws_target = ws.join(target);
+    let ws_target = ws.join(&target_dir);
+    let in_wasm = ws_target.join("wasm32-unknown-unknown").join("release").join("cycles-withdraw.wasm");
+    let out_dir_env = std::env::var("OUT_DIR").unwrap();
+    let out_wasm = Path::new(&out_dir_env).join("cycles-withdraw.wasm");
 
     w!("Installing ic-cdk-optimizer");
     let out = Command::new("cargo")
@@ -28,7 +32,7 @@ fn main() {
     w!("Launching child cargo build");
     let out = Command::new("cargo")
         .args(["build", "-p", "cycles-withdraw", "--target", "wasm32-unknown-unknown", "--release"])
-        .env("CARGO_TARGET_DIR", target)
+        .env("CARGO_TARGET_DIR", target_dir)
         .current_dir(ws)
         .output()
         .expect("Cargo build was not started");
@@ -40,10 +44,11 @@ fn main() {
     }
 
     w!("Optimizing wasm");
+    w!("{} -> {} ", in_wasm.to_str().unwrap(), out_wasm.to_str().unwrap());
     let out = Command::new("ic-cdk-optimizer")
-        .arg(ws_target.join("wasm32-unknown-unknown").join("release").join("cycles-withdraw.wasm"))
+        .arg(in_wasm)
         .arg("-o")
-        .arg(Path::new("src").join("cycles-withdraw.wasm"))
+        .arg(out_wasm)
         .output()
         .expect("Failed to optimize wasm");
 

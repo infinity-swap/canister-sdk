@@ -216,10 +216,7 @@ pub trait FactoryCanister: Canister + Sized + PreUpdate {
     #[update(trait = true)]
     fn delete_canister<'a>(&'a self, principal: Principal) -> AsyncReturn<Result<(), FactoryError>> {
         Box::pin(async move {
-            if let Err(msg) = self.can_delete_canister(principal) {
-                let err = format!("Canister deletion is not allowed: {}", msg);
-                return Err(FactoryError::ManagementError(err));
-            }
+            self.canister_delete_starting(principal)?;
 
             {
                 // We use this block to drop a RefCell borrow before the future is awaited
@@ -228,20 +225,21 @@ pub trait FactoryCanister: Canister + Sized + PreUpdate {
             }.await?;
 
             self.factory_state().borrow_mut().factory.forget(&principal)?;
-            self.canister_deleted(principal);
+            self.canister_delete_complete(principal);
             Ok(())
         })
     }
 
-    /// Checking is it Ok to delete the canister.
+    /// Method for pre-delete custom logic.
+    /// Could be used to check is it Ok to delete the canister.
     /// Should override this method depending of your particular implementation needs.
-    fn can_delete_canister(&self, canister: Principal) -> Result<(), String> {
+    fn canister_delete_starting(&self, canister: Principal) -> Result<(), FactoryError> {
         Ok(())
     }
 
     /// Called right after canister was successfully deleted and removed from the factory state.
     /// Override this method to clean custom state in your implementation.
-    fn canister_deleted(&self, canister: Principal) {}
+    fn canister_delete_complete(&self, canister: Principal) {}
 
     // Important: This function *must* be defined to be the
     // last one in the trait because it depends on the order
